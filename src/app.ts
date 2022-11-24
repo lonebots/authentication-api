@@ -6,6 +6,8 @@ import logger from "./utils/logger";
 import router from "./routes";
 
 const app = express();
+
+app.use(express.json()); // the order of the middleware matters.
 app.use(router);
 
 const port = config.get("port");
