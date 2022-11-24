@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import {
   CreateUserInput,
   ForgotPasswordInput,
+  ResetPasswordInput,
   VerifyUserInput,
 } from "../schema/user.schema";
 import {
@@ -99,4 +100,27 @@ export async function forgotPasswordHandler(
   //debug log
   logger.debug(`Password reset email sent to ${email}`);
   return res.send(message);
+}
+
+export async function resetPasswordHandler(
+  req: Request<ResetPasswordInput["params"], {}, ResetPasswordInput["body"]>,
+  res: Response
+) {
+  const { id, passwordResetCode } = req.params;
+  const { password } = req.body;
+
+  const user = await findUserById(id);
+  if (
+    !user ||
+    !user.passwordResetCode ||
+    user.passwordResetCode !== passwordResetCode
+  ) {
+    return res.status(400).send("Could not resest your password");
+  }
+
+  // if everything is fine
+  user.passwordResetCode = "";
+  user.password = password;
+  await user.save();
+  return res.status(200).send("Password reset successfully");
 }
