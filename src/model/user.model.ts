@@ -5,19 +5,12 @@ import {
   Severity,
   pre,
   DocumentType,
+  index,
 } from "@typegoose/typegoose";
 import logger from "../utils/logger";
 import argon2 from "argon2";
 import { nanoid } from "nanoid";
-@modelOptions({
-  schemaOptions: {
-    timestamps: true,
-  },
-  //to disallow multiple password reset from the same pwdreset code
-  options: {
-    allowMixed: Severity.ALLOW,
-  },
-})
+
 // hook to hash the password
 @pre<User>("save", async function () {
   if (!this.isModified("password")) {
@@ -27,6 +20,17 @@ import { nanoid } from "nanoid";
   const hash = await argon2.hash(this.password);
   this.password = hash;
   return;
+})
+// indexing by email
+@index({ email: 1 })
+@modelOptions({
+  schemaOptions: {
+    timestamps: true,
+  },
+  //to disallow multiple password reset from the same pwdreset code
+  options: {
+    allowMixed: Severity.ALLOW,
+  },
 })
 export class User {
   @prop({ lowercase: true, required: true, unique: true })
@@ -41,7 +45,7 @@ export class User {
   @prop({ required: true })
   password: string;
 
- @prop({ required: true, default: () => nanoid() })
+  @prop({ required: true, default: () => nanoid() })
   verificationCode: string;
 
   @prop()
