@@ -15,7 +15,7 @@ const validateResource =
       });
       next();
     } catch (e: any) {
-      res.status(400).send(e.error);
+      return res.status(400).send(e.error);
     }
   };
 
