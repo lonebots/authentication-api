@@ -9,7 +9,6 @@ import {
 import logger from "../utils/logger";
 import argon2 from "argon2";
 import { nanoid } from "nanoid";
-
 @modelOptions({
   schemaOptions: {
     timestamps: true,
@@ -37,13 +36,12 @@ export class User {
   firstName: string;
 
   @prop({ required: true })
-  lasttName: string;
+  lastName: string;
 
   @prop({ required: true })
   password: string;
 
   @prop({
-    required: true,
     default: () => {
       nanoid();
     },
