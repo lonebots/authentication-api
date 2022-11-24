@@ -1,10 +1,20 @@
+import logger from "../utils/logger";
 import { Request, Response } from "express";
-import { createUserInput, verifyUserInput } from "../schema/user.schema";
-import { createUser, findUserById } from "../service/user.service";
+import {
+  CreateUserInput,
+  ForgotPasswordInput,
+  VerifyUserInput,
+} from "../schema/user.schema";
+import {
+  createUser,
+  findUserByEmail,
+  findUserById,
+} from "../service/user.service";
 import sendEmail from "../utils/mailer";
+import { nanoid } from "nanoid";
 
 export async function createUserHandler(
-  req: Request<{}, {}, createUserInput>, // if the input doesn't match the schema then we need an error and for handling that we need a middleware
+  req: Request<{}, {}, CreateUserInput>, // if the input doesn't match the schema then we need an error and for handling that we need a middleware
   res: Response
 ) {
   const body = req.body;
@@ -29,7 +39,7 @@ export async function createUserHandler(
 }
 
 export async function verifyUserHandler(
-  req: Request<verifyUserInput>,
+  req: Request<VerifyUserInput>,
   res: Response
 ) {
   const id = req.params.id;
@@ -53,4 +63,40 @@ export async function verifyUserHandler(
     return res.send("User successfully verified");
   }
   return res.send("Could not verify the user.");
+}
+
+export async function forgotPasswordHandler(
+  req: Request<{}, {}, ForgotPasswordInput>,
+  res: Response
+) {
+  const message =
+    "If a user with that email is registered, you will recieve a password reset email";
+
+  const { email } = req.body;
+  const user = await findUserByEmail(email);
+
+  if (!user) {
+    logger.debug(`user with email ${email} doesnot exists`);
+    return res.send(message);
+  }
+
+  if (!user.verified) {
+    return res.send("User is not verified");
+  }
+  // generate a password reset code
+  const passwordResetCode = nanoid();
+  user.passwordResetCode = passwordResetCode;
+  await user.save();
+
+  // send email with password reset code
+  await sendEmail({
+    to: user.email,
+    from: " test@example.com",
+    subject: "Reset your password",
+    text: `Password reset code : ${passwordResetCode}, Id : ${user._id}`,
+  });
+
+  //debug log
+  logger.debug(`Password reset email sent to ${email}`);
+  return res.send(message);
 }
