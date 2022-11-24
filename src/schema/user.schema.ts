@@ -1,6 +1,7 @@
 //validate a user request
 import { object, string, TypeOf } from "zod";
 
+// user creation schema
 export const createUserSchema = object({
   body: object({
     firstName: string({
@@ -24,6 +25,7 @@ export const createUserSchema = object({
   }),
 });
 
+// verify user
 export const verifyUserSchema = object({
   params: object({
     id: string(),
@@ -31,5 +33,16 @@ export const verifyUserSchema = object({
   }),
 });
 
-export type createUserInput = TypeOf<typeof createUserSchema>["body"];
-export type verifyUserInput = TypeOf<typeof verifyUserSchema>["params"];
+// forgot password schema
+export const forgotPasswordSchema = object({
+  body: object({
+    email: string({ required_error: "Email is required" }).email(
+      "Not a valid email"
+    ),
+  }),
+});
+
+// interface export
+export type CreateUserInput = TypeOf<typeof createUserSchema>["body"];
+export type VerifyUserInput = TypeOf<typeof verifyUserSchema>["params"];
+export type ForgotPasswordInput = TypeOf<typeof forgotPasswordSchema>["body"];
