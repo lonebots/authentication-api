@@ -15,7 +15,7 @@ const smtp = config.get<{
   host: string;
   port: number;
   secure: boolean;
-}>("smptp");
+}>("smtp");
 
 //inorder to sent an email we need a transporter
 // it takes an object as propery, auth , pass
