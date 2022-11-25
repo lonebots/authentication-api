@@ -11,6 +11,13 @@ import logger from "../utils/logger";
 import argon2 from "argon2";
 import { nanoid } from "nanoid";
 
+export const privateFields = [
+  "password",
+  "verificationCode",
+  "verified",
+  "passwordResetCode",
+];
+
 // hook to hash the password
 @pre<User>("save", async function () {
   if (!this.isModified("password")) {
